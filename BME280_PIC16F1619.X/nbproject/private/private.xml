@@ -2,6 +2,15 @@
 <project-private xmlns="http://www.netbeans.org/ns/project-private/1">
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
-        <group/>
+        <group>
+            <file>file:/D:/src/GitHub/PIC/BME280_PIC16F1619/BME280_PIC16F1619.X/main.c</file>
+            <file>file:/D:/src/GitHub/PIC/BME280_PIC16F1619/BME280_PIC16F1619.X/BME280_driver/bme280.c</file>
+            <file>file:/D:/src/GitHub/PIC/BME280_PIC16F1619/BME280_PIC16F1619.X/mcc_generated_files/pin_manager.c</file>
+            <file>file:/D:/src/GitHub/PIC/BME280_PIC16F1619/BME280_PIC16F1619.X/BME280_driver/bme280_defs.h</file>
+            <file>file:/D:/src/GitHub/PIC/BME280_PIC16F1619/BME280_PIC16F1619.X/mcc_generated_files/pin_manager.h</file>
+            <file>file:/D:/src/GitHub/PIC/BME280_PIC16F1619/BME280_PIC16F1619.X/I2C_user.h</file>
+            <file>file:/D:/src/GitHub/PIC/BME280_PIC16F1619/BME280_PIC16F1619.X/mcc_generated_files/tmr1.c</file>
+            <file>file:/D:/src/GitHub/PIC/BME280_PIC16F1619/BME280_PIC16F1619.X/I2C_user.c</file>
+        </group>
     </open-files>
 </project-private>

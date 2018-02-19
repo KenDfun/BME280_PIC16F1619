@@ -46,11 +46,20 @@
 #include "./I2C_user.h"
 #include "./BME280_driver/bme280.h"
 
+//#define FORCED_MODE
+#define MAINLOOP_DELAY_MS    1000   // mSec
 
 void I2C_UserInit(void);
 void Bme280_UserInit(void);
 void user_delay_ms(uint32_t period);
+
+#ifdef FORCED_MODE
 int8_t stream_sensor_data_forced_mode(struct bme280_dev *dev);
+int8_t get_data_forced_mode(struct bme280_dev *dev);
+#else
+int8_t stream_sensor_data_normal_mode(struct bme280_dev *dev);
+int8_t get_data_normal_mode(struct bme280_dev *dev);
+#endif
 
 #define LED_D4_ON()     {D4_LAT=1;}
 #define LED_D4_OFF()    {D4_LAT=0;}
@@ -84,29 +93,32 @@ void main(void)
     LED_D4_ON();
     
     I2C_UserInit();
-    
     Bme280_UserInit();
  
-
     LED_D4_OFF();
+
+#ifdef FORCED_MODE    
+    stream_sensor_data_forced_mode(&BME280Dev);
+#else
+    stream_sensor_data_normal_mode(&BME280Dev);
+#endif
     
-stream_sensor_data_forced_mode(&BME280Dev);
-/*
     while (1)
     {
+#ifdef FORCED_MODE    
+        get_data_forced_mode(&BME280Dev);
+#else
+        get_data_normal_mode(&BME280Dev);
+#endif
+        user_delay_ms(MAINLOOP_DELAY_MS);
         D4_Toggle();
-
-        __delay_ms(1000);
     }
-*/
 }
 void debug_error(void);
 
 
 void Bme280_UserInit(void)
 {
-
-
     int8_t rslt = BME280_OK;
 
     BME280Dev.dev_id = BME280_I2C_ADDR_PRIM;
@@ -147,11 +159,11 @@ void debug_error(void)
 }
 
 void print_sensor_data(struct bme280_data *comp_data);
+#ifdef FORCED_MODE
 int8_t stream_sensor_data_forced_mode(struct bme280_dev *dev)
 {
     int8_t rslt;
     uint8_t settings_sel;
-    struct bme280_data comp_data;
  
     /* Recommended mode of operation: Indoor navigation */
     dev->settings.osr_h = BME280_OVERSAMPLING_1X;
@@ -163,26 +175,72 @@ int8_t stream_sensor_data_forced_mode(struct bme280_dev *dev)
  
     rslt = bme280_set_sensor_settings(settings_sel, dev);
  
-    printf("Temperature, Pressure, Humidity\r\n");
-    /* Continuously stream sensor data */
-    while (1) {
-        rslt = bme280_set_sensor_mode(BME280_FORCED_MODE, dev);
-        /* Wait for the measurement to complete and print data @25Hz */
-        dev->delay_ms(40);
-        rslt = bme280_get_sensor_data(BME280_ALL, &comp_data, dev);
-        print_sensor_data(&comp_data);
+    printf("Temperature, Pressure, Humidity by forced mode.\r\n");
+    
+    return rslt;
 
-    }
+}
+
+int8_t get_data_forced_mode(struct bme280_dev *dev)
+{
+    int8_t rslt;
+    struct bme280_data comp_data;
+    
+    rslt = bme280_set_sensor_mode(BME280_FORCED_MODE, dev);
+    /* Wait for the measurement to complete and print data @25Hz */
+    dev->delay_ms(40);
+    rslt = bme280_get_sensor_data(BME280_ALL, &comp_data, dev);
+    print_sensor_data(&comp_data);    
+    
     return rslt;
 }
+
+#else
+
+int8_t stream_sensor_data_normal_mode(struct bme280_dev *dev)
+{
+    int8_t rslt;
+    uint8_t settings_sel;
+
+
+    /* Recommended mode of operation: Indoor navigation */
+    dev->settings.osr_h = BME280_OVERSAMPLING_1X;
+    dev->settings.osr_p = BME280_OVERSAMPLING_16X;
+    dev->settings.osr_t = BME280_OVERSAMPLING_2X;
+    dev->settings.filter = BME280_FILTER_COEFF_16;
+    dev->settings.standby_time = BME280_STANDBY_TIME_62_5_MS;
+
+    settings_sel = BME280_OSR_PRESS_SEL;
+    settings_sel |= BME280_OSR_TEMP_SEL;
+    settings_sel |= BME280_OSR_HUM_SEL;
+    settings_sel |= BME280_STANDBY_SEL;
+    settings_sel |= BME280_FILTER_SEL;
+    rslt = bme280_set_sensor_settings(settings_sel, dev);
+    rslt = bme280_set_sensor_mode(BME280_NORMAL_MODE, dev);
+
+    printf("Temperature, Pressure, Humidity by normal mode.\r\n");
+
+    return rslt;
+}
+int8_t get_data_normal_mode(struct bme280_dev *dev)
+{
+    int8_t rslt;
+    struct bme280_data comp_data;
+    
+    /* Delay while the sensor completes a measurement */
+    //        dev->delay_ms(70);
+    rslt = bme280_get_sensor_data(BME280_ALL, &comp_data, dev);
+    print_sensor_data(&comp_data);
+    
+    return rslt;
+}
+#endif
 
 void print_sensor_data(struct bme280_data *comp_data)
 {
         printf("%ld.%02ld[C], %ld.%02ld[hPa], %ld.%03ld[%%]\r\n",   comp_data->temperature/100,comp_data->temperature%100,
                                                         comp_data->pressure/100,comp_data->pressure%100,
                                                         comp_data->humidity/1000,comp_data->humidity%1000);
-        D4_Toggle();
-        user_delay_ms(1000);
 }
 
 /**
