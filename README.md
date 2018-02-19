@@ -1,5 +1,7 @@
 # BME280_PIC16F1619
 これはBoschの温度、湿度、気圧センサBME280をPIC16F1619でコントロールするプログラムです。マイコンボードはPIC16F1619が標準で搭載されているCuriosityボードを使用しています。Curiosityボード上からI2C信号を取り出してBME280からデータを取り出してUartでデータを出力しています。  
+  
+  ![bme280_pic](https://user-images.githubusercontent.com/2620156/36353638-33c4390a-150c-11e8-958b-d502b9601d54.gif)
 
 
 ## MCCの設定
